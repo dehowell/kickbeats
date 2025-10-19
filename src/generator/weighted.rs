@@ -1,5 +1,5 @@
 use crate::generator::is_pattern_unique;
-use crate::models::{ComplexityLevel, Pattern, TimeSignature};
+use crate::models::{BeatGrid, ComplexityLevel, Pattern, TimeSignature};
 use rand::distributions::{Distribution, WeightedIndex};
 use rand::{thread_rng, Rng};
 use std::collections::VecDeque;
@@ -34,19 +34,21 @@ impl WeightedGenerator {
         Self { rng: thread_rng() }
     }
 
+    /// Generate base metrical weights using BeatGrid
+    /// Returns weights for all positions based on time signature
+    fn base_weights(time_signature: TimeSignature) -> Vec<f32> {
+        let grid = BeatGrid::new(time_signature, 16, 1);
+        let total_positions = grid.total_positions();
+
+        (0..total_positions)
+            .map(|idx| grid.position_strength(idx))
+            .collect()
+    }
+
     /// Generate base metrical weights for 4/4 time signature
     /// Returns weights for 16 positions (one measure of sixteenth notes)
     pub fn base_weights_4_4() -> Vec<f32> {
-        vec![
-            1.0, // Beat 1 (downbeat) - strongest
-            0.2, 0.3, 0.2, // Remaining 16ths of beat 1
-            0.4, // Beat 2 - medium strong
-            0.2, 0.3, 0.2, // Remaining 16ths of beat 2
-            0.7, // Beat 3 - strong
-            0.2, 0.3, 0.2, // Remaining 16ths of beat 3
-            0.4, // Beat 4 - medium strong
-            0.2, 0.3, 0.2, // Remaining 16ths of beat 4
-        ]
+        Self::base_weights(TimeSignature::four_four())
     }
 
     /// Adjust weights based on complexity level
@@ -112,7 +114,7 @@ impl WeightedGenerator {
             return Err("Only 4/4 time signature is currently supported".to_string());
         }
 
-        let base_weights = Self::base_weights_4_4();
+        let base_weights = Self::base_weights(time_signature);
         let adjusted_weights = self.adjust_weights_for_complexity(&base_weights, complexity);
         let (min_kicks, max_kicks) = self.target_kicks_for_complexity(complexity);
 
@@ -220,7 +222,7 @@ impl WeightedGenerator {
             return Err("Only 4/4 time signature is currently supported".to_string());
         }
 
-        let base_weights = Self::base_weights_4_4();
+        let base_weights = Self::base_weights(time_signature);
         let adjusted_weights = self.adjust_weights_for_complexity(&base_weights, complexity);
         let (min_kicks, max_kicks) = self.target_kicks_for_complexity(complexity);
 
