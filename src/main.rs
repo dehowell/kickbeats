@@ -27,9 +27,9 @@ struct Args {
     #[arg(short, long, default_value = "medium", value_parser = parse_complexity)]
     complexity: ComplexityLevel,
 
-    /// Time signature (currently only 4/4 supported)
-    #[arg(long, default_value = "4/4")]
-    time_signature: String,
+    /// Time signature (e.g., 4/4, 3/4, 6/8, 5/4, 7/8)
+    #[arg(long, default_value = "4/4", value_parser = parse_time_signature)]
+    time_signature: TimeSignature,
 }
 
 /// Parse complexity level from string
@@ -43,6 +43,45 @@ fn parse_complexity(s: &str) -> Result<ComplexityLevel, String> {
             s
         )),
     }
+}
+
+/// Parse time signature from string (e.g., "4/4", "3/4", "6/8")
+fn parse_time_signature(s: &str) -> Result<TimeSignature, String> {
+    let parts: Vec<&str> = s.split('/').collect();
+    if parts.len() != 2 {
+        return Err(format!(
+            "Invalid time signature '{}'. Format should be numerator/denominator (e.g., 4/4, 3/4, 6/8)",
+            s
+        ));
+    }
+
+    let numerator = parts[0].parse::<u8>().map_err(|_| {
+        format!(
+            "Invalid numerator '{}' in time signature. Must be a positive number",
+            parts[0]
+        )
+    })?;
+
+    let denominator = parts[1].parse::<u8>().map_err(|_| {
+        format!(
+            "Invalid denominator '{}' in time signature. Must be a positive number",
+            parts[1]
+        )
+    })?;
+
+    // Validate denominator is a power of 2 (common in music)
+    if ![1, 2, 4, 8, 16].contains(&denominator) {
+        return Err(format!(
+            "Denominator {} is not standard. Use 1, 2, 4, 8, or 16",
+            denominator
+        ));
+    }
+
+    if numerator == 0 {
+        return Err("Numerator must be at least 1".to_string());
+    }
+
+    Ok(TimeSignature::new(numerator, denominator))
 }
 
 fn main() {
@@ -66,18 +105,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     // Parse command-line arguments
     let args = Args::parse();
 
-    // Validate time signature (currently only 4/4 supported)
-    if args.time_signature != "4/4" {
-        return Err(format!(
-            "Time signature '{}' not supported. Currently only 4/4 is supported.",
-            args.time_signature
-        )
-        .into());
-    }
-
     let tempo_bpm = args.tempo;
     let complexity = args.complexity;
-    let time_signature = TimeSignature::four_four();
+    let time_signature = args.time_signature;
 
     // Create practice session
     let mut session = PracticeSession::new(tempo_bpm, complexity, time_signature);
