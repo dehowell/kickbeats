@@ -1,6 +1,6 @@
 use crate::engine::MidiPlaybackLoop;
 use crate::generator::WeightedGenerator;
-use crate::models::PracticeSession;
+use crate::models::{ComplexityLevel, PracticeSession};
 use crate::visualizer::format_pattern_with_metadata;
 use crossterm::{
     event::{self, Event, KeyCode, KeyEvent},
@@ -52,6 +52,8 @@ impl CommandLoop {
         println!("\nCommands:");
         println!("  [r] Reveal pattern    - Display the current rhythm as ASCII art");
         println!("  [n] New pattern       - Generate and play a new rhythm");
+        println!("  [t] Tempo             - Change playback tempo");
+        println!("  [c] Complexity        - Change pattern complexity");
         println!("  [q] Quit              - Stop playback and exit\n");
 
         println!("Pattern is now playing with click track...");
@@ -112,6 +114,14 @@ impl CommandLoop {
             }
             KeyCode::Char('n') | KeyCode::Char('N') => {
                 self.handle_new_pattern()?;
+                Ok(false)
+            }
+            KeyCode::Char('t') | KeyCode::Char('T') => {
+                self.handle_tempo_change()?;
+                Ok(false)
+            }
+            KeyCode::Char('c') | KeyCode::Char('C') => {
+                self.handle_complexity_change()?;
                 Ok(false)
             }
             KeyCode::Char('q') | KeyCode::Char('Q') => {
@@ -224,6 +234,170 @@ impl CommandLoop {
                     self.playback
                         .start(pattern.clone(), self.session.tempo_bpm, true)
                         .map_err(|e| format!("Failed to restart playback: {}", e))?;
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Handle tempo change command ('t')
+    fn handle_tempo_change(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        // Stop current playback
+        self.playback.stop();
+
+        // Disable raw mode for input
+        disable_raw_mode()?;
+
+        println!("\n🎵 Tempo Change");
+        println!("Current tempo: {} BPM", self.session.tempo_bpm);
+        print!("Enter new tempo (40-300 BPM, or press Enter to cancel): ");
+        io::stdout().flush()?;
+
+        let mut input = String::new();
+        io::stdin().read_line(&mut input)?;
+
+        let input = input.trim();
+
+        // Empty input cancels
+        if input.is_empty() {
+            println!("✗ Tempo change cancelled.\n");
+            enable_raw_mode()?;
+
+            // Restart playback with current tempo
+            if let Some(pattern) = &self.session.current_pattern {
+                self.playback
+                    .start(pattern.clone(), self.session.tempo_bpm, true)
+                    .map_err(|e| format!("Failed to restart playback: {}", e))?;
+            }
+
+            return Ok(());
+        }
+
+        // Parse and validate tempo
+        match input.parse::<u16>() {
+            Ok(tempo) if tempo >= 40 && tempo <= 300 => {
+                // Update session tempo
+                self.session.tempo_bpm = tempo;
+                self.session.update_activity();
+
+                println!("✓ Tempo changed to {} BPM", tempo);
+                println!("  Playback speed will update immediately.\n");
+
+                // Re-enable raw mode
+                enable_raw_mode()?;
+
+                // Restart playback with new tempo
+                if let Some(pattern) = &self.session.current_pattern {
+                    self.playback
+                        .start(pattern.clone(), self.session.tempo_bpm, true)
+                        .map_err(|e| format!("Failed to restart playback: {}", e))?;
+                }
+            }
+            Ok(tempo) => {
+                println!("✗ Tempo {} is out of range (40-300 BPM)", tempo);
+                println!("  Keeping current tempo of {} BPM\n", self.session.tempo_bpm);
+
+                enable_raw_mode()?;
+
+                // Restart playback with current tempo
+                if let Some(pattern) = &self.session.current_pattern {
+                    self.playback
+                        .start(pattern.clone(), self.session.tempo_bpm, true)
+                        .map_err(|e| format!("Failed to restart playback: {}", e))?;
+                }
+            }
+            Err(_) => {
+                println!("✗ Invalid input '{}'. Please enter a number.", input);
+                println!("  Keeping current tempo of {} BPM\n", self.session.tempo_bpm);
+
+                enable_raw_mode()?;
+
+                // Restart playback with current tempo
+                if let Some(pattern) = &self.session.current_pattern {
+                    self.playback
+                        .start(pattern.clone(), self.session.tempo_bpm, true)
+                        .map_err(|e| format!("Failed to restart playback: {}", e))?;
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Handle complexity change command ('c')
+    fn handle_complexity_change(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        // Disable raw mode for output
+        disable_raw_mode()?;
+
+        println!("\n🎛  Complexity Change");
+        println!("Current complexity: {:?}", self.session.complexity_level);
+        println!("\nSelect new complexity:");
+        println!("  [1] Simple   - 2-4 kicks, mostly on-beats");
+        println!("  [2] Medium   - 4-6 kicks, balanced");
+        println!("  [3] Complex  - 6-8 kicks, high syncopation");
+        println!("\nPress 1, 2, 3, or any other key to cancel");
+
+        // Re-enable raw mode for single-key input
+        enable_raw_mode()?;
+
+        // Wait for single key press with timeout (10 seconds)
+        let mut attempts = 0;
+        let max_attempts = 3;
+
+        loop {
+            if event::poll(Duration::from_secs(10))? {
+                if let Event::Key(key_event) = event::read()? {
+                    match key_event.code {
+                        KeyCode::Char('1') => {
+                            self.session.complexity_level = ComplexityLevel::Simple;
+                            self.session.update_activity();
+
+                            disable_raw_mode()?;
+                            println!("\n✓ Complexity changed to Simple");
+                            println!("  New patterns will have 2-4 kicks, mostly on-beats");
+                            println!("  Press [n] to generate a new pattern with this complexity.\n");
+                            enable_raw_mode()?;
+                            break;
+                        }
+                        KeyCode::Char('2') => {
+                            self.session.complexity_level = ComplexityLevel::Medium;
+                            self.session.update_activity();
+
+                            disable_raw_mode()?;
+                            println!("\n✓ Complexity changed to Medium");
+                            println!("  New patterns will have 4-6 kicks with balanced rhythm");
+                            println!("  Press [n] to generate a new pattern with this complexity.\n");
+                            enable_raw_mode()?;
+                            break;
+                        }
+                        KeyCode::Char('3') => {
+                            self.session.complexity_level = ComplexityLevel::Complex;
+                            self.session.update_activity();
+
+                            disable_raw_mode()?;
+                            println!("\n✓ Complexity changed to Complex");
+                            println!("  New patterns will have 6-8 kicks with high syncopation");
+                            println!("  Press [n] to generate a new pattern with this complexity.\n");
+                            enable_raw_mode()?;
+                            break;
+                        }
+                        _ => {
+                            disable_raw_mode()?;
+                            println!("\n✗ Complexity change cancelled.\n");
+                            enable_raw_mode()?;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                // Timeout - check attempts
+                attempts += 1;
+                if attempts >= max_attempts {
+                    disable_raw_mode()?;
+                    println!("\n✗ Complexity change timed out after {} attempts.\n", max_attempts);
+                    enable_raw_mode()?;
+                    break;
                 }
             }
         }

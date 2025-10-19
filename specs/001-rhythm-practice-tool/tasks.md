@@ -116,15 +116,15 @@
 
 ### Implementation for User Story 3
 
-- [ ] T040 [P] [US3] Add complexity adjustment to WeightedGenerator in src/generator/weighted.rs: adjust_for_complexity() to modify position weights based on Simple/Medium/Complex
-- [ ] T041 [P] [US3] Implement CLI argument parsing in src/main.rs using clap or manual parsing: --tempo, --complexity, --time-signature flags with validation
-- [ ] T042 [US3] Add 't' command handler in src/cli/commands.rs: prompt "Enter new tempo (40-300 BPM): ", read line, parse u16, validate range, update session.tempo_bpm
-- [ ] T043 [US3] Implement tempo change notification in src/engine/playback.rs: receive new tempo via channel, recalculate TimedNote onset times, apply immediately without stopping
-- [ ] T044 [US3] Add tempo validation and error handling in src/cli/commands.rs: non-numeric input, out of range, empty input cancels
-- [ ] T045 [US3] Add 'c' command handler in src/cli/commands.rs: display complexity menu (1=Simple, 2=Medium, 3=Complex), wait for single-key input
-- [ ] T046 [US3] Implement complexity change in src/cli/commands.rs: update session.complexity_level, display confirmation, note applies to next pattern generation
-- [ ] T047 [US3] Add complexity validation in src/cli/commands.rs: invalid choice error, retry prompt max 3 attempts, cancel on failure
-- [ ] T048 [US3] Update WeightedGenerator::generate() in src/generator/weighted.rs to use session.complexity_level for weight adjustment
+- [x] T040 [P] [US3] Add complexity adjustment to WeightedGenerator in src/generator/weighted.rs: adjust_for_complexity() to modify position weights based on Simple/Medium/Complex
+- [x] T041 [P] [US3] Implement CLI argument parsing in src/main.rs using clap or manual parsing: --tempo, --complexity, --time-signature flags with validation
+- [x] T042 [US3] Add 't' command handler in src/cli/commands.rs: prompt "Enter new tempo (40-300 BPM): ", read line, parse u16, validate range, update session.tempo_bpm
+- [x] T043 [US3] Implement tempo change notification in src/engine/playback.rs: receive new tempo via channel, recalculate TimedNote onset times, apply immediately without stopping
+- [x] T044 [US3] Add tempo validation and error handling in src/cli/commands.rs: non-numeric input, out of range, empty input cancels
+- [x] T045 [US3] Add 'c' command handler in src/cli/commands.rs: display complexity menu (1=Simple, 2=Medium, 3=Complex), wait for single-key input
+- [x] T046 [US3] Implement complexity change in src/cli/commands.rs: update session.complexity_level, display confirmation, note applies to next pattern generation
+- [x] T047 [US3] Add complexity validation in src/cli/commands.rs: invalid choice error, retry prompt max 3 attempts, cancel on failure
+- [x] T048 [US3] Update WeightedGenerator::generate() in src/generator/weighted.rs to use session.complexity_level for weight adjustment
 
 **Checkpoint**: All user stories should now be independently functional
   - US1 (MVP): Launch, listen, reveal, quit
