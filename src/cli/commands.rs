@@ -54,8 +54,52 @@ impl CommandLoop {
         println!("Listen carefully and try to identify the rhythm.\n");
     }
 
+    /// Check if the terminal supports interactive mode
+    fn check_terminal_capabilities() -> Result<(), String> {
+        // Check if stdout is a TTY
+        if !atty::is(atty::Stream::Stdout) {
+            return Err(
+                "Error: Standard output is not connected to a terminal.\n\
+                 This tool requires an interactive terminal to run.\n\
+                 Please run directly in a terminal, not through pipes or redirects."
+                    .to_string(),
+            );
+        }
+
+        // Check if stdin is a TTY
+        if !atty::is(atty::Stream::Stdin) {
+            return Err(
+                "Error: Standard input is not connected to a terminal.\n\
+                 This tool requires interactive input.\n\
+                 Please run directly in a terminal."
+                    .to_string(),
+            );
+        }
+
+        // Try to enable raw mode as a capability test
+        if let Err(e) = enable_raw_mode() {
+            let error_msg = format!(
+                "Error: Terminal does not support raw mode: {}\n\
+                 This terminal may not be compatible with interactive input.\n\
+                 Try using a different terminal emulator.",
+                e
+            );
+            return Err(error_msg);
+        }
+
+        // Disable immediately after testing
+        let _ = disable_raw_mode();
+
+        Ok(())
+    }
+
     /// Start the command loop with the current pattern
     pub fn run(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        // Check terminal capabilities before proceeding
+        if let Err(e) = Self::check_terminal_capabilities() {
+            return Err(e.into());
+        }
+
         // Display welcome message
         self.print_welcome();
 

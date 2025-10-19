@@ -46,26 +46,71 @@ impl BeatGrid {
     }
 
     /// Get metrical strength of a position (1.0 = downbeat, 0.0 = weakest)
+    /// Uses time-signature-specific metrical hierarchy
     pub fn position_strength(&self, idx: usize) -> f32 {
         let positions_per_beat = self.subdivision as usize / 4;
 
-        // Position 0 (downbeat) is strongest
+        // Position 0 (downbeat) is always strongest
         if idx == 0 {
             return 1.0;
         }
 
-        // On-beat positions (every quarter note)
-        if idx % positions_per_beat == 0 {
-            // Beat 3 is stronger than beats 2 and 4
+        // Check if this is an on-beat position
+        if idx.is_multiple_of(positions_per_beat) {
             let beat_num = idx / positions_per_beat;
-            if beat_num == 2 {
-                return 0.7; // Beat 3 (0-indexed as 2)
-            }
-            return 0.4; // Beats 2 and 4
+            return self.beat_strength(beat_num);
         }
 
-        // Off-beat positions
+        // Off-beat positions are weakest
         0.2
+    }
+
+    /// Get the metrical strength of a specific beat number based on time signature
+    /// This allows different time signatures to have different metrical hierarchies
+    fn beat_strength(&self, beat_num: usize) -> f32 {
+        match (self.time_signature.numerator, self.time_signature.denominator) {
+            // 4/4 time: strong-weak-medium-weak pattern
+            (4, 4) => match beat_num {
+                0 => 1.0,   // Downbeat (already handled above, but for completeness)
+                2 => 0.7,   // Beat 3 is secondary strong
+                _ => 0.4,   // Beats 2 and 4 are weak
+            },
+            // 3/4 time: strong-weak-weak pattern
+            (3, 4) => match beat_num {
+                0 => 1.0,   // Downbeat
+                _ => 0.4,   // All other beats are weak
+            },
+            // 6/8 time: strong-weak-weak-medium-weak-weak pattern (compound duple)
+            (6, 8) => match beat_num {
+                0 => 1.0,   // Primary downbeat
+                3 => 0.6,   // Secondary accent on beat 4
+                _ => 0.3,   // Other beats weak
+            },
+            // 2/4 time: strong-weak pattern
+            (2, 4) => match beat_num {
+                0 => 1.0,   // Downbeat
+                _ => 0.4,   // Beat 2 is weak
+            },
+            // 5/4 time: strong-weak-medium-weak-weak (3+2 or 2+3 grouping)
+            (5, 4) => match beat_num {
+                0 => 1.0,   // Downbeat
+                2 => 0.6,   // Secondary accent at beat 3
+                _ => 0.3,   // Other beats weak
+            },
+            // 7/8 time: Common groupings like 2+2+3
+            (7, 8) => match beat_num {
+                0 => 1.0,   // Downbeat
+                2 => 0.6,   // Secondary accent
+                4 => 0.5,   // Tertiary accent
+                _ => 0.3,   // Other beats weak
+            },
+            // Default pattern for unhandled time signatures
+            _ => match beat_num {
+                0 => 1.0,
+                n if n == (self.time_signature.numerator as usize / 2) => 0.6,
+                _ => 0.4,
+            }
+        }
     }
 
     /// Duration of one grid position at given tempo

@@ -5,6 +5,24 @@ use rand::{thread_rng, Rng};
 use std::collections::VecDeque;
 
 /// Generates rhythmic patterns using weighted probability
+///
+/// The generator creates kick drum patterns by assigning probability weights
+/// to each position in a beat grid based on metrical hierarchy (downbeats are
+/// more likely than off-beats). Complexity levels adjust these weights to create
+/// simpler or more syncopated patterns.
+///
+/// # Examples
+///
+/// ```no_run
+/// use kickbeats::generator::WeightedGenerator;
+/// use kickbeats::models::{TimeSignature, ComplexityLevel};
+/// use std::collections::VecDeque;
+///
+/// let mut generator = WeightedGenerator::new();
+/// let time_sig = TimeSignature::four_four();
+/// let pattern = generator.generate(time_sig, ComplexityLevel::Medium, &VecDeque::new())?;
+/// # Ok::<(), String>(())
+/// ```
 pub struct WeightedGenerator {
     /// Random number generator
     rng: rand::rngs::ThreadRng,

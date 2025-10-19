@@ -103,9 +103,34 @@ impl MidiPlaybackLoop {
             let pattern_start_time = start_time + Duration::from_secs_f64(count_in_duration);
             let mut loop_count = 0u64;
 
+            // Timing drift detection
+            const DRIFT_THRESHOLD_MS: f64 = 10.0;
+            let mut max_drift_ms: f64 = 0.0;
+
             while is_playing.load(Ordering::SeqCst) {
-                let loop_start =
+                let expected_loop_start =
                     pattern_start_time + Duration::from_secs_f64(loop_count as f64 * pattern_duration);
+                let actual_loop_start = Instant::now();
+
+                // Calculate drift
+                let drift = if actual_loop_start > expected_loop_start {
+                    actual_loop_start.duration_since(expected_loop_start).as_secs_f64() * 1000.0
+                } else {
+                    0.0
+                };
+
+                // Track maximum drift
+                if drift > max_drift_ms {
+                    max_drift_ms = drift;
+                    if drift > DRIFT_THRESHOLD_MS {
+                        eprintln!(
+                            "Warning: Timing drift detected: {:.2}ms (threshold: {:.0}ms) at loop #{}",
+                            drift, DRIFT_THRESHOLD_MS, loop_count
+                        );
+                    }
+                }
+
+                let loop_start = expected_loop_start;
                 let now = Instant::now();
 
                 // Skip if we're already past this loop (catch-up scenario)

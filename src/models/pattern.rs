@@ -4,6 +4,27 @@ use std::time::SystemTime;
 use uuid::Uuid;
 
 /// Represents a rhythmic sequence of kick drum hits and rests
+///
+/// A Pattern consists of a binary array where each element represents a sixteenth note
+/// position. `true` indicates a kick drum hit, `false` indicates a rest. Patterns are
+/// immutable after creation and include metadata about their generation.
+///
+/// # Examples
+///
+/// ```
+/// use kickbeats::models::{Pattern, TimeSignature, ComplexityLevel};
+///
+/// // Four-on-the-floor pattern (kick on every beat)
+/// let steps = vec![
+///     true, false, false, false,  // Beat 1
+///     true, false, false, false,  // Beat 2
+///     true, false, false, false,  // Beat 3
+///     true, false, false, false,  // Beat 4
+/// ];
+/// let pattern = Pattern::new(steps, TimeSignature::four_four(), ComplexityLevel::Simple);
+/// assert_eq!(pattern.note_positions(), vec![0, 4, 8, 12]);
+/// assert_eq!(pattern.density(), 0.25);  // 4 kicks out of 16 positions
+/// ```
 #[derive(Debug, Clone)]
 pub struct Pattern {
     /// Unique identifier

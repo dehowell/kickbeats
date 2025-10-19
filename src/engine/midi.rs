@@ -1,17 +1,102 @@
 use crate::models::{BeatGrid, Pattern};
 use midir::{MidiOutput, MidiOutputConnection};
 use std::error::Error;
+use std::fmt;
 
-/// MIDI note numbers
-pub const KICK_NOTE: u8 = 36; // C1 - GM standard kick drum
-pub const CLICK_NOTE: u8 = 37; // C#1 - GM standard side stick (for click)
+/// MIDI note number for kick drum sound (C1 in General MIDI percussion map)
+pub const KICK_NOTE: u8 = 36;
 
-/// MIDI velocity values
+/// MIDI note number for click/rimshot sound (C#1 in General MIDI percussion map)
+pub const CLICK_NOTE: u8 = 37;
+
+/// Default MIDI velocity for kick drum hits (0-127 range)
 pub const KICK_VELOCITY: u8 = 100;
+
+/// Default MIDI velocity for click track hits (0-127 range)
 pub const CLICK_VELOCITY: u8 = 80;
 
-/// MIDI channel (0-indexed, channel 10 = percussion)
-pub const MIDI_CHANNEL: u8 = 9; // Channel 10 (0-indexed as 9)
+/// MIDI channel for percussion (Channel 10, zero-indexed as 9)
+pub const MIDI_CHANNEL: u8 = 9;
+
+/// Custom error type for MIDI operations with platform-specific guidance
+#[derive(Debug)]
+pub struct MidiError {
+    pub message: String,
+    pub platform_hint: Option<String>,
+}
+
+impl MidiError {
+    pub fn new(message: impl Into<String>) -> Self {
+        let message = message.into();
+        let platform_hint = Self::get_platform_hint(&message);
+        Self {
+            message,
+            platform_hint,
+        }
+    }
+
+    fn get_platform_hint(error_msg: &str) -> Option<String> {
+        // Detect platform and provide specific guidance
+        #[cfg(target_os = "macos")]
+        {
+            if error_msg.contains("no ports") || error_msg.contains("not found") {
+                return Some(
+                    "macOS MIDI Setup:\n\
+                     1. Open 'Audio MIDI Setup' application (in /Applications/Utilities/)\n\
+                     2. Go to Window → Show MIDI Studio\n\
+                     3. Enable 'IAC Driver' for virtual MIDI ports\n\
+                     4. Or connect a physical MIDI device\n\
+                     5. If using virtual instrument (e.g., Logic, GarageBand), launch it first"
+                        .to_string(),
+                );
+            }
+        }
+
+        #[cfg(target_os = "linux")]
+        {
+            if error_msg.contains("no ports") || error_msg.contains("not found") {
+                return Some(
+                    "Linux ALSA Setup:\n\
+                     1. Install ALSA utilities: sudo apt-get install alsa-utils\n\
+                     2. Check ALSA devices: aconnect -l\n\
+                     3. Create virtual MIDI port: sudo modprobe snd-virmidi\n\
+                     4. Or use software synth: timidity -iA (install via: sudo apt-get install timidity)\n\
+                     5. Check permissions: user should be in 'audio' group"
+                        .to_string(),
+                );
+            }
+        }
+
+        #[cfg(target_os = "windows")]
+        {
+            if error_msg.contains("no ports") || error_msg.contains("not found") {
+                return Some(
+                    "Windows MIDI Setup:\n\
+                     1. Install a virtual MIDI driver (e.g., loopMIDI from Tobias Erichsen)\n\
+                     2. Download from: https://www.tobias-erichsen.de/software/loopmidi.html\n\
+                     3. Create a virtual port in loopMIDI\n\
+                     4. Or connect a physical MIDI device\n\
+                     5. Check Device Manager for MIDI device status"
+                        .to_string(),
+                );
+            }
+        }
+
+        None
+    }
+}
+
+impl fmt::Display for MidiError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.message)?;
+        if let Some(hint) = &self.platform_hint {
+            write!(f, "\n\n{}", hint)?;
+        }
+        Ok(())
+    }
+}
+
+impl Error for MidiError {}
 
 /// Represents a scheduled MIDI event
 #[derive(Debug, Clone, Copy)]
@@ -33,6 +118,18 @@ pub enum MidiEventType {
 }
 
 /// Manages MIDI output and playback
+///
+/// # Examples
+///
+/// ```no_run
+/// use kickbeats::engine::midi::MidiEngine;
+///
+/// let mut engine = MidiEngine::new();
+/// let ports = MidiEngine::list_ports()?;
+/// engine.connect(&ports[0])?;
+/// engine.send_note_on(36, 100)?;  // Play kick drum
+/// # Ok::<(), Box<dyn std::error::Error>>(())
+/// ```
 pub struct MidiEngine {
     /// Active MIDI output connection
     connection: Option<MidiOutputConnection>,
@@ -72,10 +169,19 @@ impl MidiEngine {
         Ok(())
     }
 
-    /// List available MIDI output ports
+    /// List available MIDI output ports with enhanced error reporting
     pub fn list_ports() -> Result<Vec<String>, Box<dyn Error>> {
-        let midi_out = MidiOutput::new("Kickbeats")?;
+        let midi_out = MidiOutput::new("Kickbeats").map_err(|e| {
+            MidiError::new(format!("Failed to initialize MIDI system: {}", e))
+        })?;
+
         let ports = midi_out.ports();
+
+        if ports.is_empty() {
+            return Err(Box::new(MidiError::new(
+                "No MIDI output ports found on this system"
+            )));
+        }
 
         let port_names: Vec<String> = ports
             .iter()
