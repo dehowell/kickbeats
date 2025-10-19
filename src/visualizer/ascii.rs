@@ -3,7 +3,7 @@ use crate::models::Pattern;
 /// Convert a pattern to ASCII art visualization
 ///
 /// Example output for a 4/4 pattern with kicks on positions 0, 4, 10, 14:
-/// ```
+/// ```text
 /// |1 e + a |2 e + a |3 e + a |4 e + a |
 /// |X . . . |X . . . |. . X . |. . . X |
 /// ```
