@@ -49,7 +49,9 @@ impl MidiPlaybackLoop {
             .map_err(|e| format!("Failed to connect to MIDI port: {}", e))?;
 
         // Generate MIDI events
-        let events = midi_engine.pattern_to_midi_events(&pattern, tempo_bpm, include_click);
+        let count_in_events = midi_engine.generate_count_in_events(tempo_bpm);
+        let pattern_events = midi_engine.pattern_to_midi_events(&pattern, tempo_bpm, include_click);
+        let count_in_duration = midi_engine.count_in_duration(tempo_bpm);
         let pattern_duration = midi_engine.pattern_duration(&pattern, tempo_bpm);
 
         // Set playing flag
@@ -65,11 +67,45 @@ impl MidiPlaybackLoop {
             }
 
             let start_time = Instant::now();
+
+            // Play count-in events once
+            for event in &count_in_events {
+                let event_time = start_time + Duration::from_secs_f64(event.time_offset);
+                let now = Instant::now();
+
+                // Sleep until event time
+                if event_time > now {
+                    let sleep_duration = event_time - now;
+                    thread::sleep(sleep_duration);
+                }
+
+                // Send MIDI event
+                let result = match event.event_type {
+                    MidiEventType::NoteOn => {
+                        midi_engine.send_note_on(event.note, event.velocity)
+                    }
+                    MidiEventType::NoteOff => midi_engine.send_note_off(event.note),
+                };
+
+                if let Err(e) = result {
+                    eprintln!("MIDI error: {}", e);
+                    is_playing.store(false, Ordering::SeqCst);
+                    break;
+                }
+
+                // Check if should stop
+                if !is_playing.load(Ordering::SeqCst) {
+                    break;
+                }
+            }
+
+            // Now loop the pattern
+            let pattern_start_time = start_time + Duration::from_secs_f64(count_in_duration);
             let mut loop_count = 0u64;
 
             while is_playing.load(Ordering::SeqCst) {
                 let loop_start =
-                    start_time + Duration::from_secs_f64(loop_count as f64 * pattern_duration);
+                    pattern_start_time + Duration::from_secs_f64(loop_count as f64 * pattern_duration);
                 let now = Instant::now();
 
                 // Skip if we're already past this loop (catch-up scenario)
@@ -79,7 +115,7 @@ impl MidiPlaybackLoop {
                 }
 
                 // Play all events for this loop
-                for event in &events {
+                for event in &pattern_events {
                     let event_time = loop_start + Duration::from_secs_f64(event.time_offset);
                     let now = Instant::now();
 

@@ -107,7 +107,36 @@ impl MidiEngine {
         }
     }
 
-    /// Convert a pattern to a sequence of MIDI events
+    /// Generate count-in click events (4 beats)
+    pub fn generate_count_in_events(&self, tempo_bpm: u16) -> Vec<MidiEvent> {
+        let mut events = Vec::new();
+        let seconds_per_beat = 60.0 / tempo_bpm as f64;
+        let count_in_beats = 4;
+
+        for beat in 0..count_in_beats {
+            let time_offset = beat as f64 * seconds_per_beat;
+
+            // Note on
+            events.push(MidiEvent {
+                time_offset,
+                note: CLICK_NOTE,
+                velocity: CLICK_VELOCITY,
+                event_type: MidiEventType::NoteOn,
+            });
+
+            // Note off (50ms later)
+            events.push(MidiEvent {
+                time_offset: time_offset + 0.05,
+                note: CLICK_NOTE,
+                velocity: 0,
+                event_type: MidiEventType::NoteOff,
+            });
+        }
+
+        events
+    }
+
+    /// Convert a pattern to a sequence of MIDI events (without count-in)
     pub fn pattern_to_midi_events(
         &self,
         pattern: &Pattern,
@@ -178,7 +207,12 @@ impl MidiEngine {
         events
     }
 
-    /// Get the duration of one pattern loop in seconds
+    /// Get the duration of the count-in in seconds
+    pub fn count_in_duration(&self, tempo_bpm: u16) -> f64 {
+        4.0 * (60.0 / tempo_bpm as f64)
+    }
+
+    /// Get the duration of one pattern loop in seconds (without count-in)
     pub fn pattern_duration(&self, pattern: &Pattern, tempo_bpm: u16) -> f64 {
         let grid = BeatGrid::new(
             pattern.time_signature,
