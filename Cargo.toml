@@ -1,0 +1,26 @@
+[package]
+name = "kickbeats"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# MIDI I/O
+midir = "0.9"
+wmidi = "4.0"
+
+# Terminal UI
+crossterm = "0.27"
+ratatui = "0.24"
+
+# Async runtime (for UI coordination)
+tokio = { version = "1.35", features = ["rt", "sync", "macros"] }
+
+# Real-time thread priority
+audio_thread_priority = "0.3"
+
+# Utilities
+uuid = { version = "1.6", features = ["v4"] }
+rand = "0.8"
+ctrlc = "3.4"
+clap = { version = "4.4", features = ["derive"] }
+atty = "0.2"
