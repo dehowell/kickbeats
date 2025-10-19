@@ -9,8 +9,6 @@ pub struct BeatGrid {
     pub subdivision: u8,
     /// Number of measures in grid
     pub num_measures: u8,
-    /// Probability weights for each grid position
-    pub position_weights: Vec<f32>,
 }
 
 impl BeatGrid {
@@ -19,13 +17,11 @@ impl BeatGrid {
         time_signature: TimeSignature,
         subdivision: u8,
         num_measures: u8,
-        position_weights: Vec<f32>,
     ) -> Self {
         Self {
             time_signature,
             subdivision,
             num_measures,
-            position_weights,
         }
     }
 

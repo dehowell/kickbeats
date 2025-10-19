@@ -14,15 +14,3 @@ impl Default for ComplexityLevel {
         ComplexityLevel::Medium
     }
 }
-
-impl ComplexityLevel {
-    /// Parse complexity from string (for CLI args)
-    pub fn from_str(s: &str) -> Option<Self> {
-        match s.to_lowercase().as_str() {
-            "simple" => Some(ComplexityLevel::Simple),
-            "medium" => Some(ComplexityLevel::Medium),
-            "complex" => Some(ComplexityLevel::Complex),
-            _ => None,
-        }
-    }
-}

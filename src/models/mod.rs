@@ -4,7 +4,6 @@
 pub mod beat_grid;
 pub mod complexity;
 pub mod pattern;
-pub mod playback_state;
 pub mod session;
 pub mod time_signature;
 

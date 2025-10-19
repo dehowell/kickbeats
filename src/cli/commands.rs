@@ -507,7 +507,7 @@ impl Drop for CommandLoop {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::{ComplexityLevel, Pattern, TimeSignature};
+    use crate::models::{ComplexityLevel, TimeSignature};
 
     #[test]
     fn test_command_loop_creation() {

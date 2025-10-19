@@ -35,7 +35,12 @@ mod tests {
     #[test]
     fn test_is_pattern_unique_empty_history() {
         let pattern = Pattern::new(
-            vec![true, false, false, false; 4],
+            vec![
+                true, false, false, false,
+                true, false, false, false,
+                true, false, false, false,
+                true, false, false, false,
+            ],
             TimeSignature::four_four(),
             ComplexityLevel::Simple,
         );

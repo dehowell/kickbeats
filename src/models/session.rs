@@ -1,6 +1,5 @@
 use super::complexity::ComplexityLevel;
 use super::pattern::Pattern;
-use super::playback_state::PlaybackState;
 use super::time_signature::TimeSignature;
 use std::collections::VecDeque;
 use std::time::SystemTime;
@@ -21,8 +20,6 @@ pub struct PracticeSession {
     pub complexity_level: ComplexityLevel,
     /// Time signature for pattern generation
     pub time_signature: TimeSignature,
-    /// Current playback status
-    pub playback_state: PlaybackState,
     /// Whether current pattern has been shown
     pub pattern_revealed: bool,
     /// Total patterns created this session
@@ -47,7 +44,6 @@ impl PracticeSession {
             tempo_bpm,
             complexity_level,
             time_signature,
-            playback_state: PlaybackState::Stopped,
             pattern_revealed: false,
             patterns_generated: 0,
             session_start: SystemTime::now(),

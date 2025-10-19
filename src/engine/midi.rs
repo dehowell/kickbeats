@@ -256,7 +256,6 @@ impl MidiEngine {
             pattern.time_signature,
             pattern.subdivision,
             pattern.num_measures,
-            vec![],
         );
 
         let seconds_per_position = grid.seconds_per_position(tempo_bpm);
@@ -324,7 +323,6 @@ impl MidiEngine {
             pattern.time_signature,
             pattern.subdivision,
             pattern.num_measures,
-            vec![],
         );
 
         grid.total_positions() as f64 * grid.seconds_per_position(tempo_bpm)

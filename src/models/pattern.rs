@@ -1,6 +1,5 @@
 use super::complexity::ComplexityLevel;
 use super::time_signature::TimeSignature;
-use std::time::SystemTime;
 use uuid::Uuid;
 
 /// Represents a rhythmic sequence of kick drum hits and rests
@@ -39,8 +38,6 @@ pub struct Pattern {
     pub num_measures: u8,
     /// Generation complexity level
     pub complexity_level: ComplexityLevel,
-    /// When pattern was generated
-    pub created_at: SystemTime,
 }
 
 impl Pattern {
@@ -60,7 +57,6 @@ impl Pattern {
             subdivision,
             num_measures,
             complexity_level,
-            created_at: SystemTime::now(),
         }
     }
 
