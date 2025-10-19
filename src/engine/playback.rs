@@ -1,4 +1,4 @@
-use crate::engine::midi::{MidiEngine, MidiEvent, MidiEventType};
+use crate::engine::midi::{MidiEngine, MidiEventType};
 use crate::models::Pattern;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;

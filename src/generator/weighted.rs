@@ -1,5 +1,5 @@
 use crate::generator::is_pattern_unique;
-use crate::models::{BeatGrid, ComplexityLevel, Pattern, TimeSignature};
+use crate::models::{ComplexityLevel, Pattern, TimeSignature};
 use rand::distributions::{Distribution, WeightedIndex};
 use rand::{thread_rng, Rng};
 use std::collections::VecDeque;

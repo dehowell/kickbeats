@@ -3,4 +3,4 @@
 
 pub mod ascii;
 
-pub use ascii::{format_pattern_with_metadata, pattern_to_ascii};
+pub use ascii::format_pattern_with_metadata;

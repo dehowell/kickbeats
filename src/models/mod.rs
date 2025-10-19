@@ -12,6 +12,5 @@ pub mod time_signature;
 pub use beat_grid::BeatGrid;
 pub use complexity::ComplexityLevel;
 pub use pattern::Pattern;
-pub use playback_state::PlaybackState;
 pub use session::PracticeSession;
 pub use time_signature::TimeSignature;
