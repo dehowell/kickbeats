@@ -36,14 +36,8 @@ impl CommandLoop {
         println!("╚═══════════════════════════════════════════════════════════╝\n");
 
         println!("Session Settings:");
-        println!(
-            "  Tempo: {} BPM",
-            self.session.tempo_bpm
-        );
-        println!(
-            "  Complexity: {:?}",
-            self.session.complexity_level
-        );
+        println!("  Tempo: {} BPM", self.session.tempo_bpm);
+        println!("  Complexity: {:?}", self.session.complexity_level);
         println!(
             "  Time Signature: {}/{}",
             self.session.time_signature.numerator, self.session.time_signature.denominator
@@ -206,10 +200,11 @@ impl CommandLoop {
 
                 // Warn if uniqueness constraint was relaxed
                 if constraint_used < 3 {
+                    println!("⚠  Could not generate sufficiently unique pattern after 10 attempts");
                     println!(
-                        "⚠  Could not generate sufficiently unique pattern after 10 attempts"
+                        "   (Relaxed uniqueness constraint to distance >= {})",
+                        constraint_used
                     );
-                    println!("   (Relaxed uniqueness constraint to distance >= {})", constraint_used);
                 }
 
                 // Re-enable raw mode
@@ -296,7 +291,10 @@ impl CommandLoop {
             }
             Ok(tempo) => {
                 println!("✗ Tempo {} is out of range (40-300 BPM)", tempo);
-                println!("  Keeping current tempo of {} BPM\n", self.session.tempo_bpm);
+                println!(
+                    "  Keeping current tempo of {} BPM\n",
+                    self.session.tempo_bpm
+                );
 
                 enable_raw_mode()?;
 
@@ -309,7 +307,10 @@ impl CommandLoop {
             }
             Err(_) => {
                 println!("✗ Invalid input '{}'. Please enter a number.", input);
-                println!("  Keeping current tempo of {} BPM\n", self.session.tempo_bpm);
+                println!(
+                    "  Keeping current tempo of {} BPM\n",
+                    self.session.tempo_bpm
+                );
 
                 enable_raw_mode()?;
 
@@ -356,7 +357,9 @@ impl CommandLoop {
                             disable_raw_mode()?;
                             println!("\n✓ Complexity changed to Simple");
                             println!("  New patterns will have 2-4 kicks, mostly on-beats");
-                            println!("  Press [n] to generate a new pattern with this complexity.\n");
+                            println!(
+                                "  Press [n] to generate a new pattern with this complexity.\n"
+                            );
                             enable_raw_mode()?;
                             break;
                         }
@@ -367,7 +370,9 @@ impl CommandLoop {
                             disable_raw_mode()?;
                             println!("\n✓ Complexity changed to Medium");
                             println!("  New patterns will have 4-6 kicks with balanced rhythm");
-                            println!("  Press [n] to generate a new pattern with this complexity.\n");
+                            println!(
+                                "  Press [n] to generate a new pattern with this complexity.\n"
+                            );
                             enable_raw_mode()?;
                             break;
                         }
@@ -378,7 +383,9 @@ impl CommandLoop {
                             disable_raw_mode()?;
                             println!("\n✓ Complexity changed to Complex");
                             println!("  New patterns will have 6-8 kicks with high syncopation");
-                            println!("  Press [n] to generate a new pattern with this complexity.\n");
+                            println!(
+                                "  Press [n] to generate a new pattern with this complexity.\n"
+                            );
                             enable_raw_mode()?;
                             break;
                         }
@@ -395,7 +402,10 @@ impl CommandLoop {
                 attempts += 1;
                 if attempts >= max_attempts {
                     disable_raw_mode()?;
-                    println!("\n✗ Complexity change timed out after {} attempts.\n", max_attempts);
+                    println!(
+                        "\n✗ Complexity change timed out after {} attempts.\n",
+                        max_attempts
+                    );
                     enable_raw_mode()?;
                     break;
                 }
@@ -420,8 +430,13 @@ impl CommandLoop {
 
         println!("Session ID: {}", self.session.session_id);
         println!("Patterns generated: {}", self.session.patterns_generated);
+        println!("Final tempo: {} BPM", self.session.tempo_bpm);
+        println!("Final complexity: {:?}", self.session.complexity_level);
 
-        if let Ok(duration) = self.session.last_activity.duration_since(self.session.session_start)
+        if let Ok(duration) = self
+            .session
+            .last_activity
+            .duration_since(self.session.session_start)
         {
             let minutes = duration.as_secs() / 60;
             let seconds = duration.as_secs() % 60;
@@ -452,7 +467,8 @@ mod tests {
 
     #[test]
     fn test_command_loop_creation() {
-        let session = PracticeSession::new(120, ComplexityLevel::Medium, TimeSignature::four_four());
+        let session =
+            PracticeSession::new(120, ComplexityLevel::Medium, TimeSignature::four_four());
         let cmd_loop = CommandLoop::new(session);
 
         assert!(!cmd_loop.playback.is_playing());
@@ -460,7 +476,8 @@ mod tests {
 
     #[test]
     fn test_welcome_message() {
-        let session = PracticeSession::new(120, ComplexityLevel::Medium, TimeSignature::four_four());
+        let session =
+            PracticeSession::new(120, ComplexityLevel::Medium, TimeSignature::four_four());
         let cmd_loop = CommandLoop::new(session);
 
         // Just verify it doesn't crash

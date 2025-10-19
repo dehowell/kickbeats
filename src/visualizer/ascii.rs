@@ -86,8 +86,8 @@ mod tests {
     #[test]
     fn test_format_pattern_with_metadata() {
         let steps = vec![
-            true, false, false, false, true, false, false, false, false, false, true, false,
-            false, false, false, true,
+            true, false, false, false, true, false, false, false, false, false, true, false, false,
+            false, false, true,
         ];
 
         let pattern = Pattern::new(steps, TimeSignature::four_four(), ComplexityLevel::Simple);

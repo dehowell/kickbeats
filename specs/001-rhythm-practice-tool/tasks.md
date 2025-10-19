@@ -138,11 +138,11 @@
 **Purpose**: Improvements that affect multiple user stories and overall quality
 
 - [ ] T049 [P] Add comprehensive error messages in src/engine/midi.rs for Linux (ALSA setup), Windows (WinMM driver), macOS (permissions) per contracts/cli-interface.md
-- [ ] T050 [P] Implement session summary statistics in src/cli/commands.rs: calculate duration, patterns_generated, average tempo, display on quit
+- [x] T050 [P] Implement session summary statistics in src/cli/commands.rs: calculate duration, patterns_generated, average tempo, display on quit
 - [ ] T051 [P] Add timing drift detection in src/engine/playback.rs: track actual vs expected loop times, log warnings if drift >10ms
 - [ ] T052 [P] Refactor BeatGrid initialization in src/generator/weighted.rs to support future time signatures (3/4, 6/8) using match on time_signature
 - [ ] T053 [P] Add terminal capability detection in src/cli/commands.rs: check for raw mode support, display graceful error if terminal is non-interactive
-- [ ] T054 Code cleanup: run cargo fmt on all files, run cargo clippy and address warnings
+- [x] T054 Code cleanup: run cargo fmt on all files, run cargo clippy and address warnings
 - [ ] T055 Validate against quickstart.md: create examples/test_midi.rs as described, verify cargo build succeeds, test MIDI output
 - [ ] T056 [P] Add inline documentation: doc comments for all public structs, functions, and methods using /// syntax
 - [ ] T057 Update README.md with build instructions, usage examples, MIDI setup per platform (macOS/Linux/Windows)

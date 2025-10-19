@@ -94,9 +94,7 @@ impl Pattern {
             if has_kick {
                 consecutive += 1;
                 if consecutive > 2 {
-                    return Err(
-                        "Pattern must not have more than 2 consecutive kicks".to_string()
-                    );
+                    return Err("Pattern must not have more than 2 consecutive kicks".to_string());
                 }
             } else {
                 consecutive = 0;

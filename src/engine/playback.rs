@@ -37,7 +37,8 @@ impl MidiPlaybackLoop {
         let mut midi_engine = MidiEngine::new();
 
         // Try to connect to first available MIDI port
-        let ports = MidiEngine::list_ports().map_err(|e| format!("Failed to list MIDI ports: {}", e))?;
+        let ports =
+            MidiEngine::list_ports().map_err(|e| format!("Failed to list MIDI ports: {}", e))?;
 
         if ports.is_empty() {
             return Err("No MIDI output ports available".to_string());
@@ -67,7 +68,8 @@ impl MidiPlaybackLoop {
             let mut loop_count = 0u64;
 
             while is_playing.load(Ordering::SeqCst) {
-                let loop_start = start_time + Duration::from_secs_f64(loop_count as f64 * pattern_duration);
+                let loop_start =
+                    start_time + Duration::from_secs_f64(loop_count as f64 * pattern_duration);
                 let now = Instant::now();
 
                 // Skip if we're already past this loop (catch-up scenario)
@@ -92,9 +94,7 @@ impl MidiPlaybackLoop {
                         MidiEventType::NoteOn => {
                             midi_engine.send_note_on(event.note, event.velocity)
                         }
-                        MidiEventType::NoteOff => {
-                            midi_engine.send_note_off(event.note)
-                        }
+                        MidiEventType::NoteOff => midi_engine.send_note_off(event.note),
                     };
 
                     if let Err(e) = result {

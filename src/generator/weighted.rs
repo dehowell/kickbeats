@@ -13,9 +13,7 @@ pub struct WeightedGenerator {
 impl WeightedGenerator {
     /// Create a new weighted generator
     pub fn new() -> Self {
-        Self {
-            rng: thread_rng(),
-        }
+        Self { rng: thread_rng() }
     }
 
     /// Generate base metrical weights for 4/4 time signature
@@ -78,9 +76,9 @@ impl WeightedGenerator {
     /// Get target number of kicks for complexity level
     fn target_kicks_for_complexity(&self, complexity: ComplexityLevel) -> (usize, usize) {
         match complexity {
-            ComplexityLevel::Simple => (2, 4),   // 2-4 kicks
-            ComplexityLevel::Medium => (4, 6),   // 4-6 kicks
-            ComplexityLevel::Complex => (6, 8),  // 6-8 kicks
+            ComplexityLevel::Simple => (2, 4),  // 2-4 kicks
+            ComplexityLevel::Medium => (4, 6),  // 4-6 kicks
+            ComplexityLevel::Complex => (6, 8), // 6-8 kicks
         }
     }
 
@@ -131,7 +129,9 @@ impl WeightedGenerator {
             }
 
             // Check uniqueness against history (Hamming distance >= 3)
-            let is_unique = history.iter().all(|prev| pattern.hamming_distance(prev) >= 3);
+            let is_unique = history
+                .iter()
+                .all(|prev| pattern.hamming_distance(prev) >= 3);
 
             if is_unique {
                 return Ok(pattern);
@@ -158,41 +158,35 @@ impl WeightedGenerator {
     ) -> Result<(Pattern, u32), String> {
         // Try with distance >= 3 (preferred)
         for _ in 0..10 {
-            if let Ok(pattern) = self.try_generate_with_distance(
-                time_signature,
-                complexity,
-                history,
-                3,
-            ) {
+            if let Ok(pattern) =
+                self.try_generate_with_distance(time_signature, complexity, history, 3)
+            {
                 return Ok((pattern, 3));
             }
         }
 
         // Try with distance >= 2 (relaxed)
         for _ in 0..10 {
-            if let Ok(pattern) = self.try_generate_with_distance(
-                time_signature,
-                complexity,
-                history,
-                2,
-            ) {
+            if let Ok(pattern) =
+                self.try_generate_with_distance(time_signature, complexity, history, 2)
+            {
                 return Ok((pattern, 2));
             }
         }
 
         // Try with distance >= 1 (minimal uniqueness)
         for _ in 0..10 {
-            if let Ok(pattern) = self.try_generate_with_distance(
-                time_signature,
-                complexity,
-                history,
-                1,
-            ) {
+            if let Ok(pattern) =
+                self.try_generate_with_distance(time_signature, complexity, history, 1)
+            {
                 return Ok((pattern, 1));
             }
         }
 
-        Err("Failed to generate unique pattern after 30 attempts with relaxed constraints".to_string())
+        Err(
+            "Failed to generate unique pattern after 30 attempts with relaxed constraints"
+                .to_string(),
+        )
     }
 
     /// Helper method to attempt pattern generation with specific distance requirement
