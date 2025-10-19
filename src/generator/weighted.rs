@@ -109,18 +109,14 @@ impl WeightedGenerator {
         complexity: ComplexityLevel,
         history: &VecDeque<Pattern>,
     ) -> Result<Pattern, String> {
-        // Only support 4/4 for now
-        if time_signature.numerator != 4 || time_signature.denominator != 4 {
-            return Err("Only 4/4 time signature is currently supported".to_string());
-        }
-
         let base_weights = Self::base_weights(time_signature);
+        let num_positions = base_weights.len();
         let adjusted_weights = self.adjust_weights_for_complexity(&base_weights, complexity);
         let (min_kicks, max_kicks) = self.target_kicks_for_complexity(complexity);
 
         // Try up to 1000 times to generate a valid, unique pattern
         for _ in 0..1000 {
-            let mut steps = vec![false; 16];
+            let mut steps = vec![false; num_positions];
 
             // Position 0 (downbeat) is always true per FR-002
             steps[0] = true;
@@ -217,18 +213,14 @@ impl WeightedGenerator {
         history: &VecDeque<Pattern>,
         min_distance: u32,
     ) -> Result<Pattern, String> {
-        // Only support 4/4 for now
-        if time_signature.numerator != 4 || time_signature.denominator != 4 {
-            return Err("Only 4/4 time signature is currently supported".to_string());
-        }
-
         let base_weights = Self::base_weights(time_signature);
+        let num_positions = base_weights.len();
         let adjusted_weights = self.adjust_weights_for_complexity(&base_weights, complexity);
         let (min_kicks, max_kicks) = self.target_kicks_for_complexity(complexity);
 
         // Try up to 100 times for this distance threshold
         for _ in 0..100 {
-            let mut steps = vec![false; 16];
+            let mut steps = vec![false; num_positions];
 
             // Position 0 (downbeat) is always true per FR-002
             steps[0] = true;
@@ -297,6 +289,51 @@ mod tests {
         );
         assert!(result.is_ok());
         let pattern = result.unwrap();
+        assert!(pattern.steps[0]); // Downbeat must be true
+        assert!(pattern.validate_steps().is_ok());
+    }
+
+    #[test]
+    fn test_generate_three_four_pattern() {
+        let mut gen = WeightedGenerator::new();
+        let result = gen.generate(
+            TimeSignature::three_four(),
+            ComplexityLevel::Medium,
+            &VecDeque::new(),
+        );
+        assert!(result.is_ok());
+        let pattern = result.unwrap();
+        assert_eq!(pattern.steps.len(), 12); // 3 beats * 4 sixteenth notes per beat
+        assert!(pattern.steps[0]); // Downbeat must be true
+        assert!(pattern.validate_steps().is_ok());
+    }
+
+    #[test]
+    fn test_generate_six_eight_pattern() {
+        let mut gen = WeightedGenerator::new();
+        let result = gen.generate(
+            TimeSignature::six_eight(),
+            ComplexityLevel::Medium,
+            &VecDeque::new(),
+        );
+        assert!(result.is_ok());
+        let pattern = result.unwrap();
+        assert_eq!(pattern.steps.len(), 12); // 6 beats * 2 sixteenth notes per beat (8th note = 2 sixteenths)
+        assert!(pattern.steps[0]); // Downbeat must be true
+        assert!(pattern.validate_steps().is_ok());
+    }
+
+    #[test]
+    fn test_generate_five_four_pattern() {
+        let mut gen = WeightedGenerator::new();
+        let result = gen.generate(
+            TimeSignature::five_four(),
+            ComplexityLevel::Complex,
+            &VecDeque::new(),
+        );
+        assert!(result.is_ok());
+        let pattern = result.unwrap();
+        assert_eq!(pattern.steps.len(), 20); // 5 beats * 4 sixteenth notes per beat
         assert!(pattern.steps[0]); // Downbeat must be true
         assert!(pattern.validate_steps().is_ok());
     }

@@ -27,10 +27,14 @@ impl BeatGrid {
 
     /// Total number of grid positions
     pub fn total_positions(&self) -> usize {
-        (self.subdivision as usize)
-            * (self.time_signature.numerator as usize)
-            * (self.num_measures as usize)
-            / 4 // subdivision is per quarter note
+        // subdivision is relative to quarter notes (16 = sixteenth notes)
+        // For time signatures with different denominators, we need to adjust
+        // Example: 6/8 means 6 eighth notes, each eighth = 2 sixteenths, so 6 * 2 = 12
+        // Formula: (subdivision / 4) gives sixteenths per quarter note (e.g., 16/4 = 4)
+        //          multiply by numerator and divide by (denominator/4) to adjust for beat value
+        let sixteenths_per_quarter = self.subdivision as usize / 4;
+        let quarters_per_measure = (self.time_signature.numerator as usize * 4) / self.time_signature.denominator as usize;
+        sixteenths_per_quarter * quarters_per_measure * self.num_measures as usize
     }
 
     /// Get indices of on-beat positions (0, 4, 8, 12 in 4/4 sixteenths)

@@ -20,6 +20,31 @@ impl TimeSignature {
     pub fn four_four() -> Self {
         Self::new(4, 4)
     }
+
+    /// Create standard 3/4 time signature (waltz time)
+    pub fn three_four() -> Self {
+        Self::new(3, 4)
+    }
+
+    /// Create standard 6/8 time signature (compound duple)
+    pub fn six_eight() -> Self {
+        Self::new(6, 8)
+    }
+
+    /// Create standard 2/4 time signature (march time)
+    pub fn two_four() -> Self {
+        Self::new(2, 4)
+    }
+
+    /// Create 5/4 time signature
+    pub fn five_four() -> Self {
+        Self::new(5, 4)
+    }
+
+    /// Create 7/8 time signature
+    pub fn seven_eight() -> Self {
+        Self::new(7, 8)
+    }
 }
 
 impl Default for TimeSignature {
