@@ -1,3 +1,4 @@
+use crate::generator::is_pattern_unique;
 use crate::models::{BeatGrid, ComplexityLevel, Pattern, TimeSignature};
 use rand::distributions::{Distribution, WeightedIndex};
 use rand::{thread_rng, Rng};
@@ -138,6 +139,119 @@ impl WeightedGenerator {
         }
 
         Err("Failed to generate valid unique pattern after 1000 attempts".to_string())
+    }
+
+    /// Generate a unique pattern with retry logic and relaxed constraints
+    ///
+    /// Attempts to generate a pattern with decreasing uniqueness requirements:
+    /// - First 10 attempts: Hamming distance >= 3
+    /// - Next 10 attempts: Hamming distance >= 2
+    /// - Final 10 attempts: Hamming distance >= 1
+    ///
+    /// Returns (pattern, constraint_used) where constraint_used indicates
+    /// which distance threshold was successful
+    pub fn generate_unique(
+        &mut self,
+        time_signature: TimeSignature,
+        complexity: ComplexityLevel,
+        history: &VecDeque<Pattern>,
+    ) -> Result<(Pattern, u32), String> {
+        // Try with distance >= 3 (preferred)
+        for _ in 0..10 {
+            if let Ok(pattern) = self.try_generate_with_distance(
+                time_signature,
+                complexity,
+                history,
+                3,
+            ) {
+                return Ok((pattern, 3));
+            }
+        }
+
+        // Try with distance >= 2 (relaxed)
+        for _ in 0..10 {
+            if let Ok(pattern) = self.try_generate_with_distance(
+                time_signature,
+                complexity,
+                history,
+                2,
+            ) {
+                return Ok((pattern, 2));
+            }
+        }
+
+        // Try with distance >= 1 (minimal uniqueness)
+        for _ in 0..10 {
+            if let Ok(pattern) = self.try_generate_with_distance(
+                time_signature,
+                complexity,
+                history,
+                1,
+            ) {
+                return Ok((pattern, 1));
+            }
+        }
+
+        Err("Failed to generate unique pattern after 30 attempts with relaxed constraints".to_string())
+    }
+
+    /// Helper method to attempt pattern generation with specific distance requirement
+    fn try_generate_with_distance(
+        &mut self,
+        time_signature: TimeSignature,
+        complexity: ComplexityLevel,
+        history: &VecDeque<Pattern>,
+        min_distance: u32,
+    ) -> Result<Pattern, String> {
+        // Only support 4/4 for now
+        if time_signature.numerator != 4 || time_signature.denominator != 4 {
+            return Err("Only 4/4 time signature is currently supported".to_string());
+        }
+
+        let base_weights = Self::base_weights_4_4();
+        let adjusted_weights = self.adjust_weights_for_complexity(&base_weights, complexity);
+        let (min_kicks, max_kicks) = self.target_kicks_for_complexity(complexity);
+
+        // Try up to 100 times for this distance threshold
+        for _ in 0..100 {
+            let mut steps = vec![false; 16];
+
+            // Position 0 (downbeat) is always true per FR-002
+            steps[0] = true;
+
+            // Generate remaining positions using weighted sampling
+            let dist = WeightedIndex::new(&adjusted_weights)
+                .map_err(|e| format!("Failed to create weighted distribution: {}", e))?;
+
+            // Target number of total kicks
+            let target_kicks = min_kicks + (self.rng.gen::<usize>() % (max_kicks - min_kicks + 1));
+
+            // Generate kicks (already have 1 from position 0)
+            let mut attempts = 0;
+            while steps.iter().filter(|&&s| s).count() < target_kicks && attempts < 100 {
+                let idx = dist.sample(&mut self.rng);
+                steps[idx] = true;
+                attempts += 1;
+            }
+
+            // Create candidate pattern
+            let pattern = Pattern::new(steps, time_signature, complexity);
+
+            // Validate pattern
+            if pattern.validate_steps().is_err() {
+                continue; // Try again
+            }
+
+            // Check uniqueness against history with specified distance
+            if is_pattern_unique(&pattern, history, min_distance) {
+                return Ok(pattern);
+            }
+        }
+
+        Err(format!(
+            "Failed to generate pattern with distance >= {}",
+            min_distance
+        ))
     }
 }
 

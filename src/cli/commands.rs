@@ -1,4 +1,5 @@
 use crate::engine::MidiPlaybackLoop;
+use crate::generator::WeightedGenerator;
 use crate::models::PracticeSession;
 use crate::visualizer::format_pattern_with_metadata;
 use crossterm::{
@@ -14,6 +15,8 @@ pub struct CommandLoop {
     session: PracticeSession,
     /// MIDI playback engine
     playback: MidiPlaybackLoop,
+    /// Pattern generator
+    generator: WeightedGenerator,
 }
 
 impl CommandLoop {
@@ -22,6 +25,7 @@ impl CommandLoop {
         Self {
             session,
             playback: MidiPlaybackLoop::new(),
+            generator: WeightedGenerator::new(),
         }
     }
 
@@ -47,6 +51,7 @@ impl CommandLoop {
 
         println!("\nCommands:");
         println!("  [r] Reveal pattern    - Display the current rhythm as ASCII art");
+        println!("  [n] New pattern       - Generate and play a new rhythm");
         println!("  [q] Quit              - Stop playback and exit\n");
 
         println!("Pattern is now playing with click track...");
@@ -105,6 +110,10 @@ impl CommandLoop {
                 self.handle_reveal()?;
                 Ok(false)
             }
+            KeyCode::Char('n') | KeyCode::Char('N') => {
+                self.handle_new_pattern()?;
+                Ok(false)
+            }
             KeyCode::Char('q') | KeyCode::Char('Q') => {
                 self.handle_quit()?;
                 Ok(true)
@@ -141,6 +150,83 @@ impl CommandLoop {
 
         // Re-enable raw mode
         enable_raw_mode()?;
+
+        Ok(())
+    }
+
+    /// Handle new pattern command ('n')
+    fn handle_new_pattern(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        // Stop current playback
+        self.playback.stop();
+
+        // Temporarily disable raw mode for output
+        disable_raw_mode()?;
+
+        println!("\n⏹  Generating new pattern...");
+
+        // Generate new unique pattern
+        let result = self.generator.generate_unique(
+            self.session.time_signature,
+            self.session.complexity_level,
+            &self.session.pattern_history,
+        );
+
+        match result {
+            Ok((pattern, constraint_used)) => {
+                // Increment counter
+                self.session.patterns_generated += 1;
+
+                // Add to history
+                self.session.add_to_history(pattern.clone());
+
+                // Set as current pattern
+                self.session.current_pattern = Some(pattern.clone());
+
+                // Reset revealed flag
+                self.session.pattern_revealed = false;
+
+                // Update activity
+                self.session.update_activity();
+
+                // Display pattern number
+                println!(
+                    "✓ Pattern #{} generated this session",
+                    self.session.patterns_generated
+                );
+
+                // Warn if uniqueness constraint was relaxed
+                if constraint_used < 3 {
+                    println!(
+                        "⚠  Could not generate sufficiently unique pattern after 10 attempts"
+                    );
+                    println!("   (Relaxed uniqueness constraint to distance >= {})", constraint_used);
+                }
+
+                // Re-enable raw mode
+                enable_raw_mode()?;
+
+                // Start playback with new pattern
+                self.playback
+                    .start(pattern, self.session.tempo_bpm, true)
+                    .map_err(|e| format!("Failed to start playback: {}", e))?;
+
+                println!("\n▶  New pattern is now playing. Press [r] to reveal.\n");
+            }
+            Err(e) => {
+                println!("✗ Failed to generate new pattern: {}", e);
+                println!("  Current pattern will continue playing.\n");
+
+                // Re-enable raw mode
+                enable_raw_mode()?;
+
+                // Restart playback with current pattern if it exists
+                if let Some(pattern) = &self.session.current_pattern {
+                    self.playback
+                        .start(pattern.clone(), self.session.tempo_bpm, true)
+                        .map_err(|e| format!("Failed to restart playback: {}", e))?;
+                }
+            }
+        }
 
         Ok(())
     }

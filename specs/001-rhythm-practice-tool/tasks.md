@@ -94,13 +94,13 @@
 
 ### Implementation for User Story 2
 
-- [ ] T033 [US2] Implement uniqueness checking in src/generator/unique.rs: is_pattern_unique() function using Hamming distance ≥ 3
-- [ ] T034 [US2] Add pattern generation with retry logic in src/generator/weighted.rs: generate_unique() method with max 10 retries, relaxing distance to 2, then 1 if needed
-- [ ] T035 [US2] Implement PracticeSession::add_to_history() in src/models/session.rs to maintain VecDeque with max 20 patterns, evicting oldest
-- [ ] T036 [US2] Add 'n' command handler in src/cli/commands.rs: call generate_unique(), add to history, set as current_pattern, reset pattern_revealed, transition MIDI playback
-- [ ] T037 [US2] Implement seamless pattern transition in src/engine/playback.rs: receive new pattern via channel, swap at loop boundary with no gap
-- [ ] T038 [US2] Add pattern generation counter in src/cli/commands.rs: increment patterns_generated, display "Pattern #X this session"
-- [ ] T039 [US2] Add uniqueness failure warning in src/cli/commands.rs: if relaxed constraint used, display "Could not generate sufficiently unique pattern after 10 attempts"
+- [x] T033 [US2] Implement uniqueness checking in src/generator/unique.rs: is_pattern_unique() function using Hamming distance ≥ 3
+- [x] T034 [US2] Add pattern generation with retry logic in src/generator/weighted.rs: generate_unique() method with max 10 retries, relaxing distance to 2, then 1 if needed
+- [x] T035 [US2] Implement PracticeSession::add_to_history() in src/models/session.rs to maintain VecDeque with max 20 patterns, evicting oldest
+- [x] T036 [US2] Add 'n' command handler in src/cli/commands.rs: call generate_unique(), add to history, set as current_pattern, reset pattern_revealed, transition MIDI playback
+- [x] T037 [US2] Implement seamless pattern transition in src/engine/playback.rs: receive new pattern via channel, swap at loop boundary with no gap
+- [x] T038 [US2] Add pattern generation counter in src/cli/commands.rs: increment patterns_generated, display "Pattern #X this session"
+- [x] T039 [US2] Add uniqueness failure warning in src/cli/commands.rs: if relaxed constraint used, display "Could not generate sufficiently unique pattern after 10 attempts"
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
   - MVP (US1) still works: launch, listen, reveal, quit
