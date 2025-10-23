@@ -129,7 +129,7 @@ export const TIME_SIGNATURES = {
  */
 export const TEMPO_CONSTRAINTS = {
   MIN: 40,
-  MAX: 300,
+  MAX: 180,
   DEFAULT: 80
 } as const;
 

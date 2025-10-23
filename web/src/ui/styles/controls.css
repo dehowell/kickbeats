@@ -104,11 +104,33 @@
 }
 
 .tempo-control__markers {
+  position: relative;
   display: flex;
-  justify-content: space-between;
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
-  padding: 0 var(--spacing-xs);
+  height: 1em;
+  margin: 0 var(--spacing-xs);
+}
+
+.tempo-control__markers span {
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+/* Position markers based on actual tempo values (40, 80, 180)
+   40 is at 0%, 80 is at (80-40)/(180-40) = 28.57%, 180 is at 100% */
+.tempo-control__markers span:nth-child(1) {
+  left: 0%;
+  transform: translateX(0); /* Don't center the first one */
+}
+
+.tempo-control__markers span:nth-child(2) {
+  left: 28.57%; /* (80-40)/(180-40) * 100 */
+}
+
+.tempo-control__markers span:nth-child(3) {
+  left: 100%;
+  transform: translateX(-100%); /* Don't center the last one */
 }
 
 /* Complexity Selector */
