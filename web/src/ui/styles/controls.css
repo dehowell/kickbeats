@@ -46,7 +46,7 @@
   text-align: center;
   border: 2px solid var(--color-border);
   border-radius: 4px;
-  background-color: var(--color-background);
+  background-color: var(--color-surface);
   color: var(--color-text);
 }
 
@@ -144,8 +144,8 @@
   padding: var(--spacing-md);
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--color-text-secondary);
-  background-color: var(--color-background);
+  color: var(--color-text);
+  background-color: var(--color-surface);
   border: 2px solid var(--color-border);
   border-radius: var(--border-radius);
   cursor: pointer;
@@ -200,10 +200,10 @@
 .time-signature-select {
   width: 100%;
   padding: var(--spacing-md);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   font-weight: 500;
   color: var(--color-text);
-  background-color: var(--color-background);
+  background-color: var(--color-surface);
   border: 2px solid var(--color-border);
   border-radius: var(--border-radius);
   cursor: pointer;
