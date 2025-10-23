@@ -1,0 +1,297 @@
+/* Settings Controls Styles */
+
+.settings-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  width: 100%;
+  max-width: 600px;
+  margin: var(--spacing-lg) auto;
+  padding: var(--spacing-lg);
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Tempo Control */
+.tempo-control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.tempo-control__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tempo-control__label {
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+}
+
+.tempo-control__value {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.tempo-input {
+  width: 60px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  text-align: center;
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.tempo-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.tempo-control__unit {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.tempo-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-border);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.tempo-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tempo-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 8px rgba(74, 144, 226, 0.1);
+}
+
+.tempo-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.tempo-slider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 8px rgba(74, 144, 226, 0.1);
+}
+
+.tempo-control__markers {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  padding: 0 var(--spacing-xs);
+}
+
+/* Complexity Selector */
+.complexity-selector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.complexity-selector__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.complexity-selector__label {
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+}
+
+.complexity-selector__buttons {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.complexity-button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.complexity-button:hover {
+  border-color: var(--color-primary);
+  background-color: rgba(74, 144, 226, 0.05);
+}
+
+.complexity-button--active {
+  color: white;
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.complexity-button--active:hover {
+  background-color: #5ba8ff;
+}
+
+.complexity-button__hint {
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.complexity-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Time Signature Selector */
+.time-signature-selector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.time-signature-selector__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.time-signature-selector__label {
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+}
+
+.time-signature-select {
+  width: 100%;
+  padding: var(--spacing-md);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.time-signature-select:hover {
+  border-color: var(--color-primary);
+}
+
+.time-signature-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.time-signature-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Touch Target Optimizations */
+.complexity-button,
+.time-signature-select,
+.tempo-slider {
+  min-height: 44px; /* iOS/Android minimum touch target */
+  min-width: 44px;
+}
+
+.tempo-slider::-webkit-slider-thumb,
+.tempo-slider::-moz-range-thumb {
+  width: 28px; /* Larger for touch */
+  height: 28px;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  /* Touch device specific styles */
+  .complexity-button {
+    min-height: 48px; /* Slightly larger for touch */
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+
+  .tempo-slider {
+    height: 8px; /* Thicker track for touch */
+  }
+
+  .tempo-slider::-webkit-slider-thumb,
+  .tempo-slider::-moz-range-thumb {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .settings-container {
+    padding: var(--spacing-md);
+  }
+
+  .complexity-selector__buttons {
+    flex-direction: column;
+  }
+
+  .tempo-input {
+    width: 60px;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-container {
+    padding: var(--spacing-sm);
+  }
+
+  .tempo-control__label,
+  .complexity-selector__label,
+  .time-signature-selector__label {
+    font-size: var(--font-size-sm);
+  }
+
+  .complexity-button {
+    padding: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    min-height: 48px; /* Ensure touch target on small screens */
+  }
+
+  .time-signature-select {
+    min-height: 48px;
+    font-size: var(--font-size-sm);
+  }
+}

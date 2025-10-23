@@ -1,0 +1,82 @@
+/* Pattern Notation Styles */
+
+.notation-container {
+  width: 100%;
+  max-width: 800px;
+  margin-top: var(--spacing-lg);
+  min-height: 200px; /* Reserve space to prevent layout shifts */
+}
+
+.pattern-notation {
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+  min-height: 180px; /* Ensure consistent height whether hidden or visible */
+}
+
+.notation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.notation-label {
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+}
+
+.notation-info {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-family: monospace;
+}
+
+.notation-display {
+  overflow-x: auto;
+  padding: var(--spacing-md);
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.pattern-svg {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  display: block;
+}
+
+.notation-empty {
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  padding: var(--spacing-xl);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .notation-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .notation-display {
+    padding: var(--spacing-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .pattern-notation {
+    padding: var(--spacing-md);
+  }
+
+  .notation-display {
+    padding: var(--spacing-xs);
+  }
+}

@@ -41,3 +41,26 @@ Thumbs.db
 # Added by cargo
 
 /target
+
+# Node.js / TypeScript (for web/ directory)
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+.npm
+.pnp
+.pnp.js
+
+# Coverage
+coverage/
+*.lcov
+.nyc_output
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Next.js / Vite
+.next/
+out/
+.vite/
+.cache/
