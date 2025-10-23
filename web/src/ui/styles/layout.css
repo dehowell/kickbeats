@@ -7,6 +7,10 @@
   min-height: 100vh;
   width: 100%;
   padding: var(--spacing-md);
+  padding-top: max(var(--spacing-md), env(safe-area-inset-top));
+  padding-right: max(var(--spacing-md), env(safe-area-inset-right));
+  padding-bottom: max(var(--spacing-md), env(safe-area-inset-bottom));
+  padding-left: max(var(--spacing-md), env(safe-area-inset-left));
   gap: var(--spacing-lg);
   max-width: 100%;
   margin: 0 auto;
@@ -39,6 +43,10 @@
 
 .main-layout {
   padding: var(--spacing-sm);
+  padding-top: max(var(--spacing-sm), env(safe-area-inset-top));
+  padding-right: max(var(--spacing-sm), env(safe-area-inset-right));
+  padding-bottom: max(var(--spacing-sm), env(safe-area-inset-bottom));
+  padding-left: max(var(--spacing-sm), env(safe-area-inset-left));
   gap: var(--spacing-md);
 }
 
@@ -50,6 +58,10 @@
 @media (min-width: 480px) {
   .main-layout {
     padding: var(--spacing-md);
+    padding-top: max(var(--spacing-md), env(safe-area-inset-top));
+    padding-right: max(var(--spacing-md), env(safe-area-inset-right));
+    padding-bottom: max(var(--spacing-md), env(safe-area-inset-bottom));
+    padding-left: max(var(--spacing-md), env(safe-area-inset-left));
     gap: var(--spacing-lg);
   }
 
@@ -71,6 +83,10 @@
   .main-layout {
     max-width: 1200px;
     padding: var(--spacing-lg);
+    padding-top: max(var(--spacing-lg), env(safe-area-inset-top));
+    padding-right: max(var(--spacing-lg), env(safe-area-inset-right));
+    padding-bottom: max(var(--spacing-lg), env(safe-area-inset-bottom));
+    padding-left: max(var(--spacing-lg), env(safe-area-inset-left));
     gap: var(--spacing-xl);
   }
 
@@ -111,6 +127,10 @@
   /* Compact layout for landscape on mobile devices */
   .main-layout {
     padding: var(--spacing-sm);
+    padding-top: max(var(--spacing-sm), env(safe-area-inset-top));
+    padding-right: max(var(--spacing-sm), env(safe-area-inset-right));
+    padding-bottom: max(var(--spacing-sm), env(safe-area-inset-bottom));
+    padding-left: max(var(--spacing-sm), env(safe-area-inset-left));
     gap: var(--spacing-sm);
   }
 

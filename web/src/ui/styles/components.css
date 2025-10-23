@@ -1,24 +1,5 @@
 /* Component Styles */
 
-/* Main Layout */
-.main-layout {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  padding: var(--spacing-lg);
-}
-
-.controls-container {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-md);
-}
-
 /* Play Button */
 .play-button {
   padding: var(--spacing-lg) var(--spacing-xl);
@@ -168,10 +149,6 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .main-layout {
-    padding: var(--spacing-md);
-  }
-
   .play-button {
     min-width: 120px;
     min-height: 50px;
