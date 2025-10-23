@@ -25,7 +25,9 @@ export class PatternNotation {
     const container = document.createElement('div');
     container.className = 'pattern-notation';
     container.setAttribute('data-testid', 'pattern-notation');
-    container.style.display = 'none'; // Hidden by default
+    container.style.visibility = 'hidden'; // Hidden by default but space reserved
+    // Render placeholder to reserve space
+    container.innerHTML = '<div class="notation-empty">Pattern will appear here</div>';
     return container;
   }
 
@@ -44,7 +46,7 @@ export class PatternNotation {
    */
   show(): void {
     this.isVisible = true;
-    this.element.style.display = 'block';
+    this.element.style.visibility = 'visible';
     this.render();
   }
 
@@ -53,7 +55,7 @@ export class PatternNotation {
    */
   hide(): void {
     this.isVisible = false;
-    this.element.style.display = 'none';
+    this.element.style.visibility = 'hidden';
   }
 
   /**
