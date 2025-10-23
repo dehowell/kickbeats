@@ -277,7 +277,15 @@ export class PracticeController {
   private handleNewPattern(): void {
     this.generateNewPattern();
 
-    // Update notation if visible
+    // Hide pattern notation to encourage practicing by ear
+    if (this.patternNotation) {
+      this.patternNotation.hide();
+      if (this.revealButton) {
+        this.revealButton.setRevealed(false);
+      }
+    }
+
+    // Update notation with new pattern (for when user reveals it)
     if (this.patternNotation && this.session.currentPattern) {
       this.patternNotation.setPattern(this.session.currentPattern);
     }
