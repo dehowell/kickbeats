@@ -243,11 +243,12 @@ export class PracticeController {
       if (shouldPlay) {
         // Ensure we have a pattern
         if (!this.session.currentPattern) {
-          this.generateNewPattern();
+          await this.generateNewPattern();
         }
 
         if (this.session.currentPattern) {
-          this.audioEngine.play(this.session.currentPattern, this.session.tempoBpm);
+          // Await play() to ensure AudioContext is resumed on iOS
+          await this.audioEngine.play(this.session.currentPattern, this.session.tempoBpm);
         }
       } else {
         this.audioEngine.pause();
@@ -266,16 +267,16 @@ export class PracticeController {
   /**
    * Toggle playback
    */
-  togglePlayback(): void {
+  async togglePlayback(): Promise<void> {
     const currentState = this.audioEngine.getState();
-    this.handlePlayToggle(!currentState.isPlaying);
+    await this.handlePlayToggle(!currentState.isPlaying);
   }
 
   /**
    * Handle new pattern generation
    */
-  private handleNewPattern(): void {
-    this.generateNewPattern();
+  private async handleNewPattern(): Promise<void> {
+    await this.generateNewPattern();
 
     // Hide pattern notation to encourage practicing by ear
     if (this.patternNotation) {
@@ -339,11 +340,11 @@ export class PracticeController {
   /**
    * Handle time signature change
    */
-  private handleTimeSignatureChange(timeSignature: import('../../models/types').TimeSignature): void {
+  private async handleTimeSignatureChange(timeSignature: import('../../models/types').TimeSignature): Promise<void> {
     this.session.timeSignature = timeSignature;
 
     // Generate new pattern with new time signature
-    this.generateNewPattern();
+    await this.generateNewPattern();
 
     // Save session
     this.saveSession();
@@ -352,7 +353,7 @@ export class PracticeController {
   /**
    * Generate new pattern
    */
-  generateNewPattern(): void {
+  async generateNewPattern(): Promise<void> {
     const pattern = this.patternGenerator.generate(
       this.session.complexityLevel,
       this.session.timeSignature,
@@ -363,7 +364,7 @@ export class PracticeController {
 
     // If playing, restart with new pattern
     if (this.audioEngine.getState().isPlaying) {
-      this.audioEngine.play(pattern, this.session.tempoBpm);
+      await this.audioEngine.play(pattern, this.session.tempoBpm);
     }
 
     // Save session after pattern change

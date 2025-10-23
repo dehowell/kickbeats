@@ -44,25 +44,56 @@ export class AudioEngine {
       this.audioContext = new AudioContextClass();
       this.scheduler = new AudioScheduler(this.audioContext);
 
+      console.log('[AudioEngine] AudioContext created. Initial state:', this.audioContext.state);
+
       // Resume audio context if suspended (browser autoplay policy)
       if (this.audioContext.state === 'suspended') {
+        console.log('[AudioEngine] Resuming suspended AudioContext');
         await this.audioContext.resume();
+        console.log('[AudioEngine] AudioContext resumed. State:', this.audioContext.state);
       }
+
+      // iOS unlock workaround: Play a silent buffer immediately after user gesture
+      // This ensures iOS properly unlocks audio output
+      this.unlockAudioOnIOS();
 
       // Verify audio context is running
       if (this.audioContext.state !== 'running') {
-        console.warn('Audio context state:', this.audioContext.state);
+        console.warn('[AudioEngine] Warning: AudioContext state is not "running":', this.audioContext.state);
+      } else {
+        console.log('[AudioEngine] AudioContext successfully initialized and running');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('[AudioEngine] Initialization failed:', errorMessage);
       throw new Error(`Failed to initialize Web Audio API: ${errorMessage}. Please ensure your browser supports Web Audio and that audio is not blocked by browser settings.`);
+    }
+  }
+
+  /**
+   * iOS-specific workaround to unlock audio
+   * Plays a silent buffer immediately to ensure audio output is enabled
+   */
+  private unlockAudioOnIOS(): void {
+    if (!this.audioContext) return;
+
+    try {
+      // Create a silent buffer
+      const buffer = this.audioContext.createBuffer(1, 1, 22050);
+      const source = this.audioContext.createBufferSource();
+      source.buffer = buffer;
+      source.connect(this.audioContext.destination);
+      source.start(0);
+      console.log('[AudioEngine] iOS unlock: played silent buffer');
+    } catch (error) {
+      console.warn('[AudioEngine] iOS unlock failed:', error);
     }
   }
 
   /**
    * Start playing a pattern
    */
-  play(pattern: Pattern, tempoBpm: number): void {
+  async play(pattern: Pattern, tempoBpm: number): Promise<void> {
     if (!this.audioContext || !this.scheduler) {
       throw new Error('Audio engine not initialized');
     }
@@ -72,10 +103,15 @@ export class AudioEngine {
       this.scheduler.stop();
     }
 
-    // Resume audio context if needed
+    // Resume audio context if needed (critical for iOS)
     if (this.audioContext.state === 'suspended') {
-      this.audioContext.resume();
+      console.log('[AudioEngine] Resuming suspended AudioContext');
+      await this.audioContext.resume();
+      console.log('[AudioEngine] AudioContext state after resume:', this.audioContext.state);
     }
+
+    // Log audio context state for debugging mobile Safari issues
+    console.log('[AudioEngine] Starting playback. AudioContext state:', this.audioContext.state);
 
     this.currentPattern = pattern;
     this.currentTempo = tempoBpm;
