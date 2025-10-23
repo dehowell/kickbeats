@@ -1,0 +1,26 @@
+{
+  "name": "kickbeats-web",
+  "version": "0.1.0",
+  "description": "Web-based rhythm practice application - PWA",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10",
+    "vite-plugin-pwa": "^0.17.4",
+    "vitest": "^1.1.0",
+    "@playwright/test": "^1.40.1",
+    "@types/node": "^20.10.6"
+  }
+}
