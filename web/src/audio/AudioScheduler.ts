@@ -108,14 +108,13 @@ export class AudioScheduler {
       // During count-in, only play clicks on beat positions
       const beatPositions = beatGrid.beatPositions();
       const isOnBeat = beatPositions.includes(this.countInNote);
-      const isDownbeat = this.countInNote === 0;
 
       if (isOnBeat) {
         this.soundSynthesis.playClick(
           this.audioContext,
           time,
           0.5,
-          isDownbeat // Emphasize downbeat
+          false // No emphasis on count-in clicks
         );
       }
     } else {
