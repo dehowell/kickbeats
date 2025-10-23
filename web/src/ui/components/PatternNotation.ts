@@ -1,6 +1,6 @@
 /**
  * Pattern Notation Component
- * Displays rhythmic pattern in ASCII-style notation
+ * Displays rhythmic pattern in graphical notation using SVG
  */
 
 import { Pattern } from '../../models/Pattern';
@@ -79,7 +79,7 @@ export class PatternNotation {
     }
 
     const beatGrid = new BeatGrid(this.pattern.timeSignature, this.pattern.subdivision, this.pattern.numMeasures);
-    const notation = this.generateNotation(this.pattern, beatGrid);
+    const svg = this.generateSVGNotation(this.pattern, beatGrid);
 
     this.element.innerHTML = `
       <div class="notation-header">
@@ -91,75 +91,101 @@ export class PatternNotation {
         </div>
       </div>
       <div class="notation-display">
-        <pre>${notation}</pre>
+        ${svg}
       </div>
     `;
   }
 
   /**
-   * Generate ASCII-style notation for the pattern
+   * Generate SVG-based graphical notation for the pattern
    */
-  private generateNotation(pattern: Pattern, beatGrid: BeatGrid): string {
-    const lines: string[] = [];
+  private generateSVGNotation(pattern: Pattern, beatGrid: BeatGrid): string {
     const totalPositions = pattern.steps.length;
-
-    // Get beat positions from BeatGrid (handles compound meters like 6/8)
     const beatPositions = beatGrid.beatPositions();
 
-    // Top line: beat numbers (one number per beat position)
-    const beatLine: string[] = [];
-    let beatCounter = 1;
+    // SVG dimensions
+    const cellWidth = 40;
+    const cellHeight = 60;
+    const padding = 20;
+    const width = totalPositions * cellWidth + padding * 2;
+    const height = cellHeight + padding * 2;
+
+    // Track measure boundaries for visual grouping
+    const stepsPerMeasure = pattern.timeSignature.numerator * pattern.subdivision;
+
+    let svg = `<svg viewBox="0 0 ${width} ${height}" class="pattern-svg" xmlns="http://www.w3.org/2000/svg">`;
+
+    // Add measure separators
+    svg += '<g class="measure-separators">';
+    for (let i = 0; i <= pattern.numMeasures; i++) {
+      const x = padding + i * stepsPerMeasure * cellWidth;
+      svg += `<line x1="${x}" y1="${padding}" x2="${x}" y2="${padding + cellHeight}"
+               stroke="var(--color-border)" stroke-width="2" opacity="0.3"/>`;
+    }
+    svg += '</g>';
+
+    // Draw each position
+    svg += '<g class="positions">';
+    let currentBeat = 1;
+
     for (let i = 0; i < totalPositions; i++) {
-      if (beatPositions.includes(i)) {
-        beatLine.push(beatCounter.toString());
-        beatCounter++;
-      } else {
-        beatLine.push(' ');
-      }
-    }
-    lines.push(beatLine.join(' '));
-
-    // Second line: subdivision markers
-    const subdivLine: string[] = [];
-    for (let i = 0; i < pattern.steps.length; i++) {
-      if (beatPositions.includes(i)) {
-        subdivLine.push('|'); // Beat marker
-      } else {
-        subdivLine.push('.'); // Subdivision marker
-      }
-    }
-    lines.push(subdivLine.join(' '));
-
-    // Third line: kick pattern
-    const kickLine: string[] = [];
-    for (let i = 0; i < pattern.steps.length; i++) {
-      if (pattern.steps[i]) {
-        kickLine.push('X'); // Kick
-      } else {
-        kickLine.push('-'); // Rest
-      }
-    }
-    lines.push(kickLine.join(' '));
-
-    // Fourth line: metrical strength visualization
-    const strengthLine: string[] = [];
-    for (let i = 0; i < pattern.steps.length; i++) {
+      const x = padding + i * cellWidth;
+      const y = padding;
+      const isBeatPosition = beatPositions.includes(i);
+      const isKick = pattern.steps[i];
       const strength = beatGrid.positionStrength(i);
-      if (strength >= 1.0) {
-        strengthLine.push('█'); // Strongest (downbeat)
-      } else if (strength >= 0.7) {
-        strengthLine.push('▓'); // Strong
-      } else if (strength >= 0.5) {
-        strengthLine.push('▒'); // Medium
-      } else if (strength >= 0.3) {
-        strengthLine.push('░'); // Weak
+
+      // Background strength indicator
+      const bgOpacity = 0.1 + strength * 0.2;
+      svg += `<rect x="${x + 5}" y="${y}" width="${cellWidth - 10}" height="${cellHeight}"
+               fill="var(--color-primary)" opacity="${bgOpacity}" rx="4"/>`;
+
+      // Beat number at top (only on beat positions)
+      if (isBeatPosition) {
+        svg += `<text x="${x + cellWidth / 2}" y="${y + 15}"
+                 text-anchor="middle"
+                 font-size="12"
+                 font-weight="bold"
+                 fill="var(--color-text)">${currentBeat}</text>`;
+        currentBeat++;
+      }
+
+      // Subdivision marker line
+      if (isBeatPosition) {
+        svg += `<line x1="${x + cellWidth / 2}" y1="${y + 20}"
+                 x2="${x + cellWidth / 2}" y2="${y + 30}"
+                 stroke="var(--color-text)" stroke-width="3"/>`;
       } else {
-        strengthLine.push('·'); // Weakest
+        svg += `<line x1="${x + cellWidth / 2}" y1="${y + 23}"
+                 x2="${x + cellWidth / 2}" y2="${y + 27}"
+                 stroke="var(--color-text-secondary)" stroke-width="2"/>`;
+      }
+
+      // Kick indicator (circle)
+      if (isKick) {
+        const radius = isBeatPosition ? 10 : 8;
+        svg += `<circle cx="${x + cellWidth / 2}" cy="${y + 45}" r="${radius}"
+                 fill="var(--color-accent)"
+                 stroke="var(--color-text)"
+                 stroke-width="2"/>`;
+      } else {
+        // Empty position (small dot)
+        svg += `<circle cx="${x + cellWidth / 2}" cy="${y + 45}" r="3"
+                 fill="var(--color-text-secondary)"
+                 opacity="0.4"/>`;
       }
     }
-    lines.push(strengthLine.join(' '));
+    svg += '</g>';
 
-    return lines.join('\n');
+    // Add legend
+    svg += `<g class="legend" transform="translate(${padding}, ${height - 15})">
+              <circle cx="0" cy="-5" r="6" fill="var(--color-accent)" stroke="var(--color-text)" stroke-width="1"/>
+              <text x="12" y="0" font-size="11" fill="var(--color-text-secondary)">Kick Drum</text>
+            </g>`;
+
+    svg += '</svg>';
+
+    return svg;
   }
 
   /**
